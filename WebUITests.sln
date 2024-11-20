@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUITests", "WebUITests\WebUITests.csproj", "{D1311160-E2E7-43BA-90DE-79118F88C4BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUITests-Nunit", "WebUITests\WebUITests-Nunit.csproj", "{D1311160-E2E7-43BA-90DE-79118F88C4BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUITests-Xunit", "WebUITests-Xunit\WebUITests-Xunit.csproj", "{B18AFD85-8DEE-4A59-A23A-91E05EC35439}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D1311160-E2E7-43BA-90DE-79118F88C4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1311160-E2E7-43BA-90DE-79118F88C4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1311160-E2E7-43BA-90DE-79118F88C4BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B18AFD85-8DEE-4A59-A23A-91E05EC35439}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B18AFD85-8DEE-4A59-A23A-91E05EC35439}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B18AFD85-8DEE-4A59-A23A-91E05EC35439}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B18AFD85-8DEE-4A59-A23A-91E05EC35439}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
