@@ -9,12 +9,16 @@ using SeleniumExtras.WaitHelpers;
 
 namespace WebUITestsXUnit
 {
+
     /// <summary>
     /// This class contains tests for verifying various functionalities on the EHU website using xUnit.
     /// </summary>
+    /// 
+
     public class EHUPageTestsXUnit : IDisposable
     {
-        private readonly IWebDriver driver;
+        private IWebDriver driver;
+
         private readonly string ehuBaseUrl;
         private readonly string aboutPageUrl;
         private readonly string searchTerm;
@@ -25,6 +29,12 @@ namespace WebUITestsXUnit
         /// </summary>
         public EHUPageTestsXUnit()
         {
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.AddArgument("--incognito");
+            chromeOptions.AddArgument("--disable-extensions");
+            driver = new ChromeDriver(chromeOptions);
+            driver.Manage().Window.Maximize();
+
             // Load configuration from appsettings.json
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -36,10 +46,6 @@ namespace WebUITestsXUnit
             aboutPageUrl = configuration["TestSettings:AboutPageUrl"];
             searchTerm = configuration["TestSettings:SearchTerm"];
             lithuanianVersionUrl = configuration["TestSettings:LithuanianVersionUrl"];
-
-            // Initialize ChromeDriver
-            driver = new ChromeDriver();
-            driver.Manage().Window.Maximize();
         }
 
         /// <summary>
