@@ -49,29 +49,49 @@ namespace WebUITestsXUnit
         }
 
         /// <summary>
+        /// Data provider for "VerifyNavigationToAboutEHUPage"
+        /// </summary>
+        public static IEnumerable<object[]> NavigationTestData =>
+            new[]
+            {
+                new object[] { "https://en.ehu.lt", "https://en.ehu.lt/about/", "About", "About" }
+            };
+
+        /// <summary>
         /// Test to verify navigation to the "About EHU" page.
         /// </summary>
-        [Fact]
+        [Theory]
+        [MemberData(nameof(NavigationTestData))]
         [Trait("Category", "Navigation")]
-        public void VerifyNavigationToAboutEHUPage()
+        public void VerifyNavigationToAboutEHUPage(string baseUrl, string aboutUrl, string expectedTitle, string expectedHeader)
         {
-            driver.Navigate().GoToUrl(ehuBaseUrl);
+            driver.Navigate().GoToUrl(baseUrl);
             var aboutLink = driver.FindElement(By.LinkText("About"));
             aboutLink.Click();
-            Assert.Equal(aboutPageUrl, driver.Url);
-            Assert.Equal("About", driver.Title);
+            Assert.Equal(aboutUrl, driver.Url);
+            Assert.Equal(expectedTitle, driver.Title);
             var header = driver.FindElement(By.TagName("h1")).Text;
-            Assert.Equal("About", header);
+            Assert.Equal(expectedHeader, header);
         }
+
+        /// <summary>
+        /// Data provider for "VerifySearchFunctionality"
+        /// </summary>
+        public static IEnumerable<object[]> SearchTestData =>
+            new[]
+            {
+                new object[] { "https://en.ehu.lt", "study programs" }
+            };
 
         /// <summary>
         /// Test to verify the search functionality on the EHU website.
         /// </summary>
-        [Fact]
+        [Theory]
+        [MemberData(nameof(SearchTestData))]
         [Trait("Category", "Search")]
-        public void VerifySearchFunctionality()
+        public void VerifySearchFunctionality(string baseUrl, string searchTerm)
         {
-            driver.Navigate().GoToUrl(ehuBaseUrl);
+            driver.Navigate().GoToUrl(baseUrl);
 
             // Locate and click the search button to open the search bar
             var searchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
@@ -93,13 +113,23 @@ namespace WebUITestsXUnit
         }
 
         /// <summary>
+        /// Data provider for "VerifyLanguageChangeFunctionality"
+        /// </summary>
+        public static IEnumerable<object[]> LanguageChangeTestData =>
+            new[]
+            {
+                new object[] { "https://en.ehu.lt", "https://lt.ehu.lt/" }
+            };
+
+        /// <summary>
         /// Test to verify the functionality of changing the website language from English to Lithuanian.
         /// </summary>
-        [Fact]
+        [Theory]
+        [MemberData(nameof(LanguageChangeTestData))]
         [Trait("Category", "Language")]
-        public void VerifyLanguageChangeFunctionality()
+        public void VerifyLanguageChangeFunctionality(string baseUrl, string lithuanianUrl)
         {
-            driver.Navigate().GoToUrl(ehuBaseUrl);
+            driver.Navigate().GoToUrl(baseUrl);
 
             // Locate and click the language switcher to open the menu
             var languageSwitchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul"));
@@ -111,10 +141,10 @@ namespace WebUITestsXUnit
 
             // Wait for the Lithuanian version to load and verify the URL
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(d => d.Url.Equals(lithuanianVersionUrl));
+            wait.Until(d => d.Url.Equals(lithuanianUrl));
 
             // Assert the URL has changed to the Lithuanian version
-            Assert.Equal(lithuanianVersionUrl, driver.Url);
+            Assert.Equal(lithuanianUrl, driver.Url);
         }
 
         /// <summary>

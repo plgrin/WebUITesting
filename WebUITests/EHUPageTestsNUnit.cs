@@ -29,6 +29,8 @@ namespace WebUITests
         private string? searchTerm;
         private string? lithuanianVersionUrl;
 
+        private IConfiguration configuration;
+
         /// <summary>
         /// Set up method that initializes the configuration and the Chrome WebDriver.
         /// </summary>
@@ -50,29 +52,61 @@ namespace WebUITests
             lithuanianVersionUrl = configuration["TestSettings:LithuanianVersionUrl"];
         }
 
+        private static IEnumerable<object[]> NavigationTestCases()
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            yield return new object[]
+            {
+                config["TestSettings:EHUBaseUrl"],
+                config["TestSettings:AboutPageUrl"],
+                "About",
+                "About"
+            };
+        }
+
         /// <summary>
         /// Test to verify navigation to the "About EHU" page.
         /// </summary>
-        [Test]
-        public void VerifyNavigationToAboutEHUPage()
+        [Test, TestCaseSource(nameof(NavigationTestCases))]
+        public void VerifyNavigationToAboutEHUPage(string baseUrl, string aboutUrl, string expectedTitle, string expectedHeader)
         {
             driver.Value.Navigate().GoToUrl(ehuBaseUrl);
+
             var aboutLink = driver.Value.FindElement(By.LinkText("About"));
             aboutLink.Click();
-            Assert.That(driver.Value.Url, Is.EqualTo(aboutPageUrl), "The URL does not match the expected value.");
-            Assert.That(driver.Value.Title, Is.EqualTo("About"), "The page title does not match the expected value.");
+
+            Assert.That(driver.Value.Url, Is.EqualTo(aboutUrl), "The URL does not match the expected value.");
+            Assert.That(driver.Value.Title, Is.EqualTo(expectedTitle), "The page title does not match the expected value.");
             var header = driver.Value.FindElement(By.TagName("h1")).Text;
-            Assert.That(header, Is.EqualTo("About"), "The content header does not match the expected value.");
+            Assert.That(header, Is.EqualTo(expectedHeader), "The content header does not match the expected value.");
+        }
+
+        private static IEnumerable<object[]> SearchTestCases()
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            yield return new object[]
+            {
+                config["TestSettings:EHUBaseUrl"],
+                config["TestSettings:SearchTerm"]
+            };
         }
 
         /// <summary>
         /// Test to verify the search functionality on the EHU website.
         /// </summary>
-        [Test]
-        public void VerifySearchFunctionality()
+        [Test, TestCaseSource(nameof(SearchTestCases))]
+        public void VerifySearchFunctionality(string baseUrl, string searchTerm)
         {
             // Step 1: Navigate to the base URL
-            driver.Value.Navigate().GoToUrl(ehuBaseUrl);
+            driver.Value.Navigate().GoToUrl(baseUrl);
 
             // Step 2: Locate and click the search button to open the search bar
             var searchButton = driver.Value.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
@@ -81,12 +115,10 @@ namespace WebUITests
             // Step 3: Locate the search bar and input the search term
             var searchBar = driver.Value.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input"));
             searchBar.SendKeys(searchTerm);
-
-            // Step 4: Submit the search query
             searchBar.SendKeys(Keys.Enter);
 
             // Step 5: Verify the URL contains the search term
-            Assert.That(driver.Value.Url, Does.Contain("/?s=study+programs"), "The URL does not contain the expected search query.");
+            Assert.That(driver.Value.Url, Does.Contain("/?s=" + searchTerm.Replace(" ", "+")), "The URL does not contain the expected search query.");
 
             // Step 6: Verify search results are displayed
             var searchResults = driver.Value.FindElements(By.XPath("//*[@id=\"page\"]/div[3]")); 
@@ -97,13 +129,28 @@ namespace WebUITests
             Assert.That(resultsContainSearchTerm, Is.True, "Search results do not contain expected term 'study programs'.");
         }
 
+        // Data provider for "VerifyLanguageChangeFunctionality"
+        private static IEnumerable<object[]> LanguageChangeTestCases()
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            yield return new object[]
+            {
+                config["TestSettings:EHUBaseUrl"],
+                config["TestSettings:LithuanianVersionUrl"]
+            };
+        }
+
         /// <summary>
         /// Test to verify the functionality of changing the website language from English to Lithuanian.
         /// </summary>
-        [Test]
-        public void VerifyLanguageChangeFunctionality()
+        [Test, TestCaseSource(nameof(LanguageChangeTestCases))]
+        public void VerifyLanguageChangeFunctionality(string baseUrl, string lithuanianUrl)
         {
-            driver.Value.Navigate().GoToUrl(ehuBaseUrl);
+            driver.Value.Navigate().GoToUrl(baseUrl);
 
             // Step 2: Locate and click the language switcher to open the menu
             var languageSwitchButton = driver.Value.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul"));
@@ -115,10 +162,10 @@ namespace WebUITests
 
             // Step 4: Wait for the Lithuanian version to load and verify the URL
             var wait = new WebDriverWait(driver.Value, TimeSpan.FromSeconds(10));
-            wait.Until(d => d.Url.Equals(lithuanianVersionUrl));
+            wait.Until(d => d.Url.Equals(lithuanianUrl));
 
             // Step 5: Assert the URL has changed to the Lithuanian version
-            Assert.That(driver.Value.Url, Is.EqualTo(lithuanianVersionUrl), "The URL does not match the expected value.");
+            Assert.That(driver.Value.Url, Is.EqualTo(lithuanianUrl), "The URL does not match the expected value.");
         }
 
         /// <summary>
