@@ -6,6 +6,8 @@ using System.IO;
 using Xunit;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
+using WebUITests_Xunit.PageObjects;
+using WebUITests_Xunit.Utilities;
 
 namespace WebUITestsXUnit
 {
@@ -17,35 +19,20 @@ namespace WebUITestsXUnit
 
     public class EHUPageTestsXUnit : IDisposable
     {
-        private IWebDriver driver;
-
-        private readonly string ehuBaseUrl;
-        private readonly string aboutPageUrl;
-        private readonly string searchTerm;
-        private readonly string lithuanianVersionUrl;
+        private readonly HomePage _homePage;
+        private readonly AboutPage _aboutPage;
+        private readonly SearchResultsPage _searchResultsPage;
 
         /// <summary>
         /// Constructor for initializing the test environment, including loading configuration and setting up the WebDriver.
         /// </summary>
         public EHUPageTestsXUnit()
         {
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--incognito");
-            chromeOptions.AddArgument("--disable-extensions");
-            driver = new ChromeDriver(chromeOptions);
-            driver.Manage().Window.Maximize();
+            DriverSingleton.InitializeDriver();
 
-            // Load configuration from appsettings.json
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            // Retrieve data from the configuration file
-            ehuBaseUrl = configuration["TestSettings:EHUBaseUrl"];
-            aboutPageUrl = configuration["TestSettings:AboutPageUrl"];
-            searchTerm = configuration["TestSettings:SearchTerm"];
-            lithuanianVersionUrl = configuration["TestSettings:LithuanianVersionUrl"];
+            _homePage = new HomePage(DriverSingleton.Driver);
+            _aboutPage = new AboutPage(DriverSingleton.Driver);
+            _searchResultsPage = new SearchResultsPage(DriverSingleton.Driver);
         }
 
         /// <summary>
@@ -65,13 +52,12 @@ namespace WebUITestsXUnit
         [Trait("Category", "Navigation")]
         public void VerifyNavigationToAboutEHUPage(string baseUrl, string aboutUrl, string expectedTitle, string expectedHeader)
         {
-            driver.Navigate().GoToUrl(baseUrl);
-            var aboutLink = driver.FindElement(By.LinkText("About"));
-            aboutLink.Click();
-            Assert.Equal(aboutUrl, driver.Url);
-            Assert.Equal(expectedTitle, driver.Title);
-            var header = driver.FindElement(By.TagName("h1")).Text;
-            Assert.Equal(expectedHeader, header);
+            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
+            _homePage.NavigateToAboutPage();
+
+            Assert.Equal(aboutUrl, DriverSingleton.Driver.Url);
+            Assert.Equal(expectedTitle, DriverSingleton.Driver.Title);
+            Assert.Equal(expectedHeader, _aboutPage.GetHeaderText());
         }
 
         /// <summary>
@@ -91,25 +77,13 @@ namespace WebUITestsXUnit
         [Trait("Category", "Search")]
         public void VerifySearchFunctionality(string baseUrl, string searchTerm)
         {
-            driver.Navigate().GoToUrl(baseUrl);
+            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
 
-            // Locate and click the search button to open the search bar
-            var searchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
-            searchButton.Click();
+            _homePage.PerformSearch(searchTerm);
 
-            // Locate the search bar and input the search term
-            var searchBar = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input"));
-            searchBar.SendKeys(searchTerm);
-
-            // Submit the search query
-            searchBar.SendKeys(Keys.Enter);
-
-            // Verify the URL contains the search term
-            Assert.Contains("/?s=study+programs", driver.Url);
-
-            // Verify search results are displayed
-            var searchResults = driver.FindElements(By.XPath("//*[@id=\"page\"]/div[3]"));
-            Assert.True(searchResults.Count > 0, "No search results were found.");
+            Assert.Contains("/?s=" + searchTerm.Replace(" ", "+"), DriverSingleton.Driver.Url);
+            Assert.True(_searchResultsPage.AreResultsPresent(), "No search results were found.");
+            Assert.True(_searchResultsPage.DoResultsContainTerm("study program"), "Search results do not contain expected term 'study programs'.");
         }
 
         /// <summary>
@@ -129,22 +103,11 @@ namespace WebUITestsXUnit
         [Trait("Category", "Language")]
         public void VerifyLanguageChangeFunctionality(string baseUrl, string lithuanianUrl)
         {
-            driver.Navigate().GoToUrl(baseUrl);
+            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
 
-            // Locate and click the language switcher to open the menu
-            var languageSwitchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul"));
-            languageSwitchButton.Click();
+            _homePage.SwitchLanguageToLithuanian();
 
-            // Locate and click the Lithuanian language option (Lietuvių)
-            var ltButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul/li/ul/li[3]/a"));
-            ltButton.Click();
-
-            // Wait for the Lithuanian version to load and verify the URL
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(d => d.Url.Equals(lithuanianUrl));
-
-            // Assert the URL has changed to the Lithuanian version
-            Assert.Equal(lithuanianUrl, driver.Url);
+            Assert.Equal(lithuanianUrl, DriverSingleton.Driver.Url);
         }
 
         /// <summary>
@@ -152,7 +115,7 @@ namespace WebUITestsXUnit
         /// </summary>
         public void Dispose()
         {
-            driver?.Quit();
+            DriverSingleton.Driver?.Quit();
         }
     }
 }

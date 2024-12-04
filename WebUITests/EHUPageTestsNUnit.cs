@@ -6,7 +6,8 @@ using System.IO;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.Interactions;
 using SeleniumExtras.WaitHelpers;
-
+using PageObjects;
+using Utilities;
 
 namespace WebUITests
 {
@@ -17,13 +18,9 @@ namespace WebUITests
     [Parallelizable(ParallelScope.All)]
     public class EHUPageTestsNUnit
     {
-        private static ThreadLocal<IWebDriver> driver = new ThreadLocal<IWebDriver>(() =>
-        {
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--incognito"); // Используем режим инкогнито для изоляции
-            chromeOptions.AddArgument("--disable-extensions"); // Отключение расширений для стабильности
-            return new ChromeDriver(chromeOptions);
-        });
+        private HomePage _homePage;
+        private AboutPage _aboutPage;
+        private SearchResultsPage _searchResultsPage;
 
         /// <summary>
         /// Set up method that initializes the configuration and the Chrome WebDriver.
@@ -31,13 +28,11 @@ namespace WebUITests
         [SetUp]
         public void Setup()
         {
-            driver.Value.Manage().Window.Maximize();
+            DriverSingleton.InitializeDriver();
 
-            // Load configuration from appsettings.json
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
+            _homePage = new HomePage(DriverSingleton.Driver);
+            _aboutPage = new AboutPage(DriverSingleton.Driver);
+            _searchResultsPage = new SearchResultsPage(DriverSingleton.Driver);
         }
 
         // Data provider for "VerifyNavigationToAboutEHUPage"
@@ -47,6 +42,7 @@ namespace WebUITests
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
+
 
             yield return new object[]
             {
@@ -63,15 +59,13 @@ namespace WebUITests
         [Test, TestCaseSource(nameof(NavigationTestCases))]
         public void VerifyNavigationToAboutEHUPage(string baseUrl, string aboutUrl, string expectedTitle, string expectedHeader)
         {
-            driver.Value.Navigate().GoToUrl(baseUrl);
+            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
 
-            var aboutLink = driver.Value.FindElement(By.LinkText("About"));
-            aboutLink.Click();
+            _homePage.NavigateToAboutPage();
 
-            Assert.That(driver.Value.Url, Is.EqualTo(aboutUrl), "The URL does not match the expected value.");
-            Assert.That(driver.Value.Title, Is.EqualTo(expectedTitle), "The page title does not match the expected value.");
-            var header = driver.Value.FindElement(By.TagName("h1")).Text;
-            Assert.That(header, Is.EqualTo(expectedHeader), "The content header does not match the expected value.");
+            Assert.That(DriverSingleton.Driver.Url, Is.EqualTo(aboutUrl), "The URL does not match the expected value.");
+            Assert.That(DriverSingleton.Driver.Title, Is.EqualTo(expectedTitle), "The page title does not match the expected value.");
+            Assert.That(_aboutPage.GetHeaderText(), Is.EqualTo(expectedHeader), "The content header does not match the expected value.");
         }
 
         // Data provider for "VerifySearchFunctionality"
@@ -95,22 +89,13 @@ namespace WebUITests
         [Test, TestCaseSource(nameof(SearchTestCases))]
         public void VerifySearchFunctionality(string baseUrl, string searchTerm)
         {
-            driver.Value.Navigate().GoToUrl(baseUrl);
+            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
 
-            var searchButton = driver.Value.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
-            searchButton.Click();
+            _homePage.PerformSearch(searchTerm);
 
-            var searchBar = driver.Value.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input"));
-            searchBar.SendKeys(searchTerm);
-            searchBar.SendKeys(Keys.Enter);
-
-            Assert.That(driver.Value.Url, Does.Contain("/?s=" + searchTerm.Replace(" ", "+")), "The URL does not contain the expected search query.");
-
-            var searchResults = driver.Value.FindElements(By.XPath("//*[@id=\"page\"]/div[3]")); 
-            Assert.That(searchResults.Count, Is.GreaterThan(0), "No search results were found.");
-
-            bool resultsContainSearchTerm = searchResults.Any(result => result.Text.Contains("study program", StringComparison.OrdinalIgnoreCase));
-            Assert.That(resultsContainSearchTerm, Is.True, "Search results do not contain expected term 'study programs'.");
+            Assert.That(DriverSingleton.Driver.Url, Does.Contain("/?s=" + searchTerm.Replace(" ", "+")), "The URL does not contain the expected search query.");
+            Assert.That(_searchResultsPage.AreResultsPresent(), Is.True, "No search results were found.");
+            Assert.That(_searchResultsPage.DoResultsContainTerm("study program"), Is.True, "Search results do not contain expected term 'study programs'.");
         }
 
         // Data provider for "VerifyLanguageChangeFunctionality"
@@ -134,18 +119,11 @@ namespace WebUITests
         [Test, TestCaseSource(nameof(LanguageChangeTestCases))]
         public void VerifyLanguageChangeFunctionality(string baseUrl, string lithuanianUrl)
         {
-            driver.Value.Navigate().GoToUrl(baseUrl);
+            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
 
-            var languageSwitchButton = driver.Value.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul"));
-            languageSwitchButton.Click();
+            _homePage.SwitchLanguageToLithuanian();
 
-            var ltButton = driver.Value.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul/li/ul/li[3]/a"));
-            ltButton.Click();
-
-            var wait = new WebDriverWait(driver.Value, TimeSpan.FromSeconds(10));
-            wait.Until(d => d.Url.Equals(lithuanianUrl));
-
-            Assert.That(driver.Value.Url, Is.EqualTo(lithuanianUrl), "The URL does not match the expected value.");
+            Assert.That(DriverSingleton.Driver.Url, Is.EqualTo(lithuanianUrl), "The URL does not match the expected value.");
         }
 
         /// <summary>
@@ -154,7 +132,7 @@ namespace WebUITests
         [TearDown]
         public void Teardown()
         {
-            driver.Value.Quit();
+            DriverSingleton.Driver.Quit();
         }
     }
 }
