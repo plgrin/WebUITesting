@@ -8,6 +8,7 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using WebUITests_Xunit.PageObjects;
 using WebUITests_Xunit.Utilities;
+using FluentAssertions;
 
 namespace WebUITestsXUnit
 {
@@ -28,6 +29,7 @@ namespace WebUITestsXUnit
         /// </summary>
         public EHUPageTestsXUnit()
         {
+            Logger.Log.Information("Initializing WebDriver and setting up the test environment.");
             DriverSingleton.InitializeDriver();
 
             _homePage = new HomePage(DriverSingleton.Driver);
@@ -52,12 +54,24 @@ namespace WebUITestsXUnit
         [Trait("Category", "Navigation")]
         public void VerifyNavigationToAboutEHUPage(string baseUrl, string aboutUrl, string expectedTitle, string expectedHeader)
         {
-            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
-            _homePage.NavigateToAboutPage();
+            Logger.Log.Information($"Starting test: VerifyNavigationToAboutEHUPage. Base URL: {baseUrl}, About URL: {aboutUrl}");
 
-            Assert.Equal(aboutUrl, DriverSingleton.Driver.Url);
-            Assert.Equal(expectedTitle, DriverSingleton.Driver.Title);
-            Assert.Equal(expectedHeader, _aboutPage.GetHeaderText());
+            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
+            Logger.Log.Information($"Navigated to base URL: {baseUrl}");
+
+            _homePage.NavigateToAboutPage();
+            Logger.Log.Information("Navigated to About page.");
+
+            Logger.Log.Debug($"Expected URL: {aboutUrl}, Actual URL: {DriverSingleton.Driver.Url}");
+            DriverSingleton.Driver.Url.Should().Be(aboutUrl, "the URL should match the About page URL.");
+
+            Logger.Log.Debug($"Expected Title: {expectedTitle}, Actual Title: {DriverSingleton.Driver.Title}");
+            DriverSingleton.Driver.Title.Should().Be(expectedTitle, "the page title should match the expected title.");
+
+            Logger.Log.Debug($"Expected Header: {expectedHeader}, Actual Header: {_aboutPage.GetHeaderText()}");
+            _aboutPage.GetHeaderText().Should().Be(expectedHeader, "the header text should match the expected header.");
+
+            Logger.Log.Information("Test passed: VerifyNavigationToAboutEHUPage.");
         }
 
         /// <summary>
@@ -77,13 +91,24 @@ namespace WebUITestsXUnit
         [Trait("Category", "Search")]
         public void VerifySearchFunctionality(string baseUrl, string searchTerm)
         {
+            Logger.Log.Information($"Starting test: VerifySearchFunctionality. Base URL: {baseUrl}, Search Term: {searchTerm}");
+
             DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
+            Logger.Log.Information($"Navigated to base URL: {baseUrl}");
 
             _homePage.PerformSearch(searchTerm);
+            Logger.Log.Information($"Performed search with term: {searchTerm}");
 
-            Assert.Contains("/?s=" + searchTerm.Replace(" ", "+"), DriverSingleton.Driver.Url);
-            Assert.True(_searchResultsPage.AreResultsPresent(), "No search results were found.");
-            Assert.True(_searchResultsPage.DoResultsContainTerm("study program"), "Search results do not contain expected term 'study programs'.");
+            Logger.Log.Debug($"Expected part of URL: /?s={searchTerm.Replace(" ", "+")}, Actual URL: {DriverSingleton.Driver.Url}");
+            DriverSingleton.Driver.Url.Should().Contain("/?s=" + searchTerm.Replace(" ", "+"), "the search query should be part of the URL.");
+
+            Logger.Log.Debug("Verifying search results presence.");
+            _searchResultsPage.AreResultsPresent().Should().BeTrue("search results should be present.");
+
+            Logger.Log.Debug("Verifying search results contain the expected term.");
+            _searchResultsPage.DoResultsContainTerm("study program").Should().BeTrue("search results should contain the expected term 'study programs'.");
+
+            Logger.Log.Information("Test passed: VerifySearchFunctionality.");
         }
 
         /// <summary>
@@ -103,11 +128,18 @@ namespace WebUITestsXUnit
         [Trait("Category", "Language")]
         public void VerifyLanguageChangeFunctionality(string baseUrl, string lithuanianUrl)
         {
+            Logger.Log.Information($"Starting test: VerifyLanguageChangeFunctionality. Base URL: {baseUrl}, Lithuanian URL: {lithuanianUrl}");
+
             DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
+            Logger.Log.Information($"Navigated to base URL: {baseUrl}");
 
             _homePage.SwitchLanguageToLithuanian();
+            Logger.Log.Information("Switched language to Lithuanian.");
 
-            Assert.Equal(lithuanianUrl, DriverSingleton.Driver.Url);
+            Logger.Log.Debug($"Expected URL: {lithuanianUrl}, Actual URL: {DriverSingleton.Driver.Url}");
+            DriverSingleton.Driver.Url.Should().Be(lithuanianUrl, "the URL should match the Lithuanian version of the site.");
+
+            Logger.Log.Information("Test passed: VerifyLanguageChangeFunctionality.");
         }
 
         /// <summary>
@@ -115,6 +147,7 @@ namespace WebUITestsXUnit
         /// </summary>
         public void Dispose()
         {
+            Logger.Log.Information("Tearing down the test environment and quitting WebDriver.");
             DriverSingleton.Driver?.Quit();
         }
     }
