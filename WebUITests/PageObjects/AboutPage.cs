@@ -1,18 +1,15 @@
 ﻿using OpenQA.Selenium;
+using WebUITests.PageObjects;
 
 namespace PageObjects
 {
-    public class AboutPage
+    public class AboutPage : BasePage
     {
-        private readonly IWebDriver _driver;
+        public AboutPage(IWebDriver driver) : base(driver) { }
 
-        public AboutPage(IWebDriver driver)
-        {
-            _driver = driver;
-        }
 
         // Локатор заголовка H1
-        private IWebElement Header => _driver.FindElement(By.TagName("h1"));
+        private IWebElement Header => Driver.FindElement(By.TagName("h1"));
 
         public string GetHeaderText()
         {

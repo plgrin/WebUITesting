@@ -2,17 +2,12 @@
 
 namespace WebUITests_Xunit.PageObjects
 {
-    public class AboutPage
+    public class AboutPage : BasePage
     {
-        private readonly IWebDriver _driver;
-
-        public AboutPage(IWebDriver driver)
-        {
-            _driver = driver;
-        }
+        public AboutPage(IWebDriver driver) : base(driver) { }
 
         // Локатор заголовка H1
-        private IWebElement Header => _driver.FindElement(By.TagName("h1"));
+        private IWebElement Header => Driver.FindElement(By.TagName("h1"));
 
         public string GetHeaderText()
         {

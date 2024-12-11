@@ -1,18 +1,15 @@
 ﻿using OpenQA.Selenium;
+using WebUITests.PageObjects;
 
 namespace PageObjects
 {
-    public class SearchResultsPage
+    public class SearchResultsPage : BasePage
     {
-        private readonly IWebDriver _driver;
+        public SearchResultsPage(IWebDriver driver) : base(driver) { }
 
-        public SearchResultsPage(IWebDriver driver)
-        {
-            _driver = driver;
-        }
 
         // Локатор для поиска контейнера с результатами
-        private IReadOnlyCollection<IWebElement> SearchResults => _driver.FindElements(By.XPath("//*[@id=\"page\"]/div[3]"));
+        private IReadOnlyCollection<IWebElement> SearchResults => Driver.FindElements(By.XPath("//*[@id=\"page\"]/div[3]"));
 
         public bool AreResultsPresent()
         {

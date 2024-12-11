@@ -6,16 +6,7 @@ namespace Utilities
 {
     public class DriverSingleton
     {
-        private static ThreadLocal<IWebDriver> _driver = new ThreadLocal<IWebDriver>(() =>
-        {
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--incognito");
-            chromeOptions.AddArgument("--disable-extensions");
-            var driver = new ChromeDriver(chromeOptions); new ChromeDriver(chromeOptions);
-
-            driver.Manage().Window.Maximize();
-            return driver;
-        });
+        private static ThreadLocal<IWebDriver> _driver = new ThreadLocal<IWebDriver>(() => DriverManager.CreateDriver());
 
         private DriverSingleton() { }
 

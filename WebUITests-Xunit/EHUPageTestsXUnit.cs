@@ -56,7 +56,7 @@ namespace WebUITestsXUnit
         {
             Logger.Log.Information($"Starting test: VerifyNavigationToAboutEHUPage. Base URL: {baseUrl}, About URL: {aboutUrl}");
 
-            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
+            _homePage.NavigateTo(baseUrl);
             Logger.Log.Information($"Navigated to base URL: {baseUrl}");
 
             _homePage.NavigateToAboutPage();
@@ -93,7 +93,7 @@ namespace WebUITestsXUnit
         {
             Logger.Log.Information($"Starting test: VerifySearchFunctionality. Base URL: {baseUrl}, Search Term: {searchTerm}");
 
-            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
+            _homePage.NavigateTo(baseUrl);
             Logger.Log.Information($"Navigated to base URL: {baseUrl}");
 
             _homePage.PerformSearch(searchTerm);
@@ -130,7 +130,7 @@ namespace WebUITestsXUnit
         {
             Logger.Log.Information($"Starting test: VerifyLanguageChangeFunctionality. Base URL: {baseUrl}, Lithuanian URL: {lithuanianUrl}");
 
-            DriverSingleton.Driver.Navigate().GoToUrl(baseUrl);
+            _homePage.NavigateTo(baseUrl);
             Logger.Log.Information($"Navigated to base URL: {baseUrl}");
 
             _homePage.SwitchLanguageToLithuanian();
