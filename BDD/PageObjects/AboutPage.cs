@@ -1,6 +1,6 @@
 ﻿using OpenQA.Selenium;
 
-namespace WebUITests.PageObjects
+namespace BDD.PageObjects
 {
     public class AboutPage : BasePage
     {

@@ -1,4 +1,4 @@
-﻿namespace Utilities
+﻿namespace WebUITests.Utilities
 {
     public class UrlBuilder
     {

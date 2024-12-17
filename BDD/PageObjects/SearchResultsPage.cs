@@ -1,6 +1,6 @@
 ﻿using OpenQA.Selenium;
 
-namespace WebUITests.PageObjects
+namespace BDD.PageObjects
 {
     public class SearchResultsPage : BasePage
     {
@@ -18,14 +18,6 @@ namespace WebUITests.PageObjects
         public bool DoResultsContainTerm(string term)
         {
             return SearchResults.Any(result => result.Text.Contains(term, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public List<string> GetSearchResultsText()
-        {
-            return SearchResults
-                .Select(result => result.Text.Trim()) // Извлекаем текст и убираем лишние пробелы
-                .Where(text => !string.IsNullOrEmpty(text)) // Исключаем пустые строки
-                .ToList();
         }
     }
 }

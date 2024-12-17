@@ -2,7 +2,7 @@
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 
-namespace WebUITests.PageObjects
+namespace BDD.PageObjects
 {
     public class HomePage : BasePage
     {

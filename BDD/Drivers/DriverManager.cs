@@ -1,7 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace WebUITests.Utilities
+namespace BDD.Drivers
 {
     public static class DriverManager
     {

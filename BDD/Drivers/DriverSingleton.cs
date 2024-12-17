@@ -1,7 +1,8 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using System;
 
-namespace WebUITests.Utilities
+namespace BDD.Drivers
 {
     public class DriverSingleton
     {

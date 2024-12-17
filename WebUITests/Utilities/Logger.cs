@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace Utilities
+namespace WebUITests.Utilities
 {
     public static class Logger
     {

@@ -1,13 +1,7 @@
 ﻿using NUnit.Framework;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using Microsoft.Extensions.Configuration;
-using System.IO;
-using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium.Interactions;
-using SeleniumExtras.WaitHelpers;
-using PageObjects;
-using Utilities;
+using WebUITests.PageObjects;
+using WebUITests.Utilities;
 using FluentAssertions; 
 
 namespace WebUITests
