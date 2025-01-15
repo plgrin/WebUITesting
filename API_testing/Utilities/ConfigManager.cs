@@ -13,7 +13,7 @@ namespace API_testing.Utilities
 
         static ConfigManager()
         {
-            var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
+            var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "appsettings.json");
 
             if (!File.Exists(configPath))
             {
