@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using AventStack.ExtentReports;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +13,32 @@ namespace API_testing.Tests
         [Fact]
         public void GetAllBooks_ReturnsListWithCorrectFields()
         {
-            var response = ApiClient.Get("/Books");
-            Assert.Equal(200, (int)response.StatusCode);
+            StartTest(nameof(GetAllBooks_ReturnsListWithCorrectFields));
 
-            var books = JsonConvert.DeserializeObject<List<dynamic>>(response.Content);
-            Assert.NotEmpty(books);
-
-            foreach (var book in books)
+            try
             {
-                Assert.NotNull((string)book.title);
-                Assert.NotNull((string)book.author);
-                Assert.NotNull((string)book.publishedDate);
+                Test.Log(Status.Info, "Sending GET request to retrieve all books.");
+                var response = ApiClient.Get("/Books");
+                Test.Log(Status.Info, $"Response: {response.Content}");
+
+                Assert.Equal(200, (int)response.StatusCode);
+
+                var books = JsonConvert.DeserializeObject<List<dynamic>>(response.Content);
+                Assert.NotEmpty(books);
+
+                foreach (var book in books)
+                {
+                    Assert.NotNull((string)book.title);
+                    Assert.NotNull((string)book.author);
+                    Assert.NotNull((string)book.publishedDate);
+                }
+
+                Test.Log(Status.Pass, "All books retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                Test.Log(Status.Fail, "Error during retrieving all books test: " + ex.Message);
+                throw;
             }
         }
     }

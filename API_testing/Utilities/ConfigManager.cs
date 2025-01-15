@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AventStack.ExtentReports;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace API_testing.Utilities
 
             if (!File.Exists(configPath))
             {
+                ExtentReportManager.CurrentTest?.Log(Status.Error, $"Configuration file not found at path: {configPath}");
                 throw new FileNotFoundException($"Configuration file not found at path: {configPath}");
             }
 
@@ -30,6 +32,7 @@ namespace API_testing.Utilities
             foreach (var token in tokens)
             {
                 value = value[token];
+                ExtentReportManager.CurrentTest?.Log(Status.Error, $"Key '{key}' not found in configuration.");
                 if (value == null) throw new ArgumentException($"Key '{key}' not found in configuration.");
             }
 
